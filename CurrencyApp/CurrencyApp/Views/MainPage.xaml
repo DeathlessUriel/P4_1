@@ -1,0 +1,239 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="CurrencyApp.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="CurrencyApp"
+    BackgroundColor="#F5F7FA">
+
+	<ScrollView>
+		<VerticalStackLayout Padding="20" Spacing="18">
+
+			<Label
+                Text="CurrencyApp"
+                FontSize="30"
+                FontAttributes="Bold"
+                TextColor="#1F2937"
+                HorizontalOptions="Center" />
+
+			<Label
+                Text="Aplikacja z kursami walut"
+                FontSize="16"
+                TextColor="#6B7280"
+                HorizontalOptions="Center" />
+
+			<Frame
+                CornerRadius="18"
+                Padding="16"
+                BackgroundColor="White"
+                BorderColor="#E5E7EB"
+                HasShadow="True">
+
+				<VerticalStackLayout Spacing="10">
+					<Label
+                        Text="{Binding EffectiveDate}"
+                        FontSize="14"
+                        TextColor="#6B7280" />
+
+					<Label
+                        Text="{Binding ErrorMessage}"
+                        TextColor="Red"
+                        FontAttributes="Bold" />
+
+					<Label
+                        Text="Tryb offline aktywny"
+                        TextColor="DarkOrange"
+                        FontAttributes="Bold"
+                        IsVisible="{Binding IsOfflineMode}" />
+
+					<Button
+                        Text="Pobierz / Odśwież kursy"
+                        Command="{Binding LoadRatesCommand}"
+                        HeightRequest="50"
+                        BackgroundColor="#2563EB"
+                        TextColor="White"
+                        CornerRadius="12" />
+
+					<ActivityIndicator
+                        IsRunning="{Binding IsBusy}"
+                        IsVisible="{Binding IsBusy}"
+                        Color="#2563EB" />
+				</VerticalStackLayout>
+			</Frame>
+
+			<Frame
+                CornerRadius="18"
+                Padding="16"
+                BackgroundColor="White"
+                BorderColor="#E5E7EB"
+                HasShadow="True">
+
+				<VerticalStackLayout Spacing="12">
+					<Label
+                        Text="Lista walut"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#111827" />
+
+					<Entry
+                        Placeholder="Szukaj waluty (np. EUR, dolar, frank)"
+                        Text="{Binding SearchText}"
+                        BackgroundColor="#F9FAFB"
+                        TextColor="#111827" />
+
+					<CollectionView
+                        ItemsSource="{Binding Rates}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedCurrency}"
+                        HeightRequest="300">
+
+						<CollectionView.ItemTemplate>
+							<DataTemplate>
+								<Frame
+                                    Margin="0,5"
+                                    Padding="12"
+                                    CornerRadius="14"
+                                    BackgroundColor="#F9FAFB"
+                                    BorderColor="#E5E7EB">
+
+									<Grid ColumnDefinitions="2*,1*,1*">
+										<Label
+                                            Grid.Column="0"
+                                            Text="{Binding Currency}"
+                                            FontAttributes="Bold"
+                                            TextColor="#111827" />
+
+										<Label
+                                            Grid.Column="1"
+                                            Text="{Binding Code}"
+                                            HorizontalTextAlignment="Center"
+                                            TextColor="#374151" />
+
+										<Label
+                                            Grid.Column="2"
+                                            Text="{Binding Mid, StringFormat='{0:F4}'}"
+                                            HorizontalTextAlignment="End"
+                                            TextColor="#2563EB"
+                                            FontAttributes="Bold" />
+									</Grid>
+								</Frame>
+							</DataTemplate>
+						</CollectionView.ItemTemplate>
+					</CollectionView>
+				</VerticalStackLayout>
+			</Frame>
+
+			<Frame
+                CornerRadius="18"
+                Padding="16"
+                BackgroundColor="White"
+                BorderColor="#E5E7EB"
+                HasShadow="True">
+
+				<VerticalStackLayout Spacing="12">
+					<Label
+                        Text="Przelicznik walut"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#111827" />
+
+					<Label
+                        Text="{Binding SelectedCurrency.Code, StringFormat='Wybrana waluta: {0}'}"
+                        FontAttributes="Bold"
+                        TextColor="#2563EB" />
+
+					<Entry
+                        Placeholder="Podaj kwotę w PLN"
+                        Keyboard="Numeric"
+                        Text="{Binding AmountPln}"
+                        BackgroundColor="#F9FAFB"
+                        TextColor="#111827" />
+
+					<Button
+                        Text="Przelicz PLN → waluta"
+                        Command="{Binding ConvertFromPlnCommand}"
+                        BackgroundColor="#10B981"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="48" />
+
+					<Entry
+                        Placeholder="Podaj kwotę w wybranej walucie"
+                        Keyboard="Numeric"
+                        Text="{Binding AmountForeign}"
+                        BackgroundColor="#F9FAFB"
+                        TextColor="#111827" />
+
+					<Button
+                        Text="Przelicz waluta → PLN"
+                        Command="{Binding ConvertToPlnCommand}"
+                        BackgroundColor="#F59E0B"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="48" />
+
+					<Label
+                        Text="{Binding ResultText}"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#111827" />
+				</VerticalStackLayout>
+			</Frame>
+
+			<Frame
+                CornerRadius="18"
+                Padding="16"
+                BackgroundColor="White"
+                BorderColor="#E5E7EB"
+                HasShadow="True">
+
+				<VerticalStackLayout Spacing="12">
+					<Grid ColumnDefinitions="*,Auto">
+						<Label
+                            Grid.Column="0"
+                            Text="Historia przeliczeń"
+                            FontSize="22"
+                            FontAttributes="Bold"
+                            TextColor="#111827" />
+
+						<Button
+                            Grid.Column="1"
+                            Text="Wyczyść"
+                            Command="{Binding ClearHistoryCommand}"
+                            BackgroundColor="#EF4444"
+                            TextColor="White"
+                            CornerRadius="10"
+                            HeightRequest="40" />
+					</Grid>
+
+					<CollectionView
+                        ItemsSource="{Binding ConversionHistory}"
+                        HeightRequest="220">
+						<CollectionView.ItemTemplate>
+							<DataTemplate>
+								<Frame
+                                    Margin="0,5"
+                                    Padding="10"
+                                    CornerRadius="12"
+                                    BackgroundColor="#F9FAFB"
+                                    BorderColor="#E5E7EB">
+									<VerticalStackLayout Spacing="4">
+										<Label
+                                            Text="{Binding Description}"
+                                            FontAttributes="Bold"
+                                            TextColor="#111827" />
+										<Label
+                                            Text="{Binding Date, StringFormat='{0:dd.MM.yyyy HH:mm}'}"
+                                            FontSize="12"
+                                            TextColor="#6B7280" />
+									</VerticalStackLayout>
+								</Frame>
+							</DataTemplate>
+						</CollectionView.ItemTemplate>
+					</CollectionView>
+				</VerticalStackLayout>
+			</Frame>
+
+		</VerticalStackLayout>
+	</ScrollView>
+</ContentPage>
