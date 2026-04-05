@@ -6,21 +6,21 @@ namespace CurrencyApp.Services
     public class CurrencyService : ICurrencyService
     {
         private readonly HttpClient _httpClient;
-        private const string ApiUrl = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json";
+        private const string BaseUrl = "https://api.nbp.pl/api/exchangerates";
 
         public CurrencyService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public async Task<(List<CurrencyRate> Rates, string EffectiveDate)> GetRatesAsync()
+        public async Task<CurrencyTableResponse> GetRatesAsync()
         {
-            var response = await _httpClient.GetAsync(ApiUrl);
+            string url = $"{BaseUrl}/tables/A?format=json";
+
+            var response = await _httpClient.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception("Nie udało się pobrać kursów walut z API.");
-            }
+                throw new Exception("Nie udało się pobrać kursów walut z API NBP.");
 
             var json = await response.Content.ReadAsStringAsync();
 
@@ -29,16 +29,39 @@ namespace CurrencyApp.Services
                 PropertyNameCaseInsensitive = true
             };
 
-            var tables = JsonSerializer.Deserialize<List<CurrencyTableResponse>>(json, options);
+            var result = JsonSerializer.Deserialize<List<CurrencyTableResponse>>(json, options);
 
-            if (tables == null || tables.Count == 0)
+            if (result == null || result.Count == 0)
+                throw new Exception("API NBP zwróciło pustą odpowiedź.");
+
+            return result[0];
+        }
+
+        public async Task<List<HistoricalRate>> GetHistoricalRatesAsync(string code, DateTime startDate, DateTime endDate)
+        {
+            string start = startDate.ToString("yyyy-MM-dd");
+            string end = endDate.ToString("yyyy-MM-dd");
+
+            string url = $"{BaseUrl}/rates/A/{code}/{start}/{end}/?format=json";
+
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Nie udało się pobrać danych historycznych.");
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions
             {
-                throw new Exception("API zwróciło pustą odpowiedź.");
-            }
+                PropertyNameCaseInsensitive = true
+            };
 
-            var table = tables[0];
+            var result = JsonSerializer.Deserialize<HistoricalRateResponse>(json, options);
 
-            return (table.Rates.OrderBy(r => r.Code).ToList(), table.EffectiveDate);
+            if (result == null || result.Rates == null || result.Rates.Count == 0)
+                throw new Exception("Brak danych historycznych dla wybranej waluty.");
+
+            return result.Rates;
         }
     }
 }

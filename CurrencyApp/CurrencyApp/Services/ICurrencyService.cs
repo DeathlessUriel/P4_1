@@ -4,6 +4,7 @@ namespace CurrencyApp.Services
 {
     public interface ICurrencyService
     {
-        Task<(List<CurrencyRate> Rates, string EffectiveDate)> GetRatesAsync();
+        Task<CurrencyTableResponse> GetRatesAsync();
+        Task<List<HistoricalRate>> GetHistoricalRatesAsync(string code, DateTime startDate, DateTime endDate);
     }
 }

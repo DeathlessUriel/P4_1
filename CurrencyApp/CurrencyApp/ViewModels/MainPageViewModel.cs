@@ -44,10 +44,132 @@ namespace CurrencyApp.ViewModels
         [ObservableProperty]
         private bool isOfflineMode;
 
+        [ObservableProperty]
+        private string currentRateText = "-";
+
+        [ObservableProperty]
+        private string minRateText = "-";
+
+        [ObservableProperty]
+        private string maxRateText = "-";
+
+        [ObservableProperty]
+        private string averageRateText = "-";
+
+        [ObservableProperty]
+        private string trendText = "-";
+
+        [ObservableProperty]
+        private string trendIcon = "➖";
+
+        [ObservableProperty]
+        private string trendColorHex = "#6B7280";
         public MainPageViewModel(ICurrencyService currencyService, LocalStorageService localStorageService)
         {
             _currencyService = currencyService;
             _localStorageService = localStorageService;
+        }
+
+        private void CalculateTrend(List<decimal> values)
+        {
+            if (values.Count < 2)
+            {
+                TrendText = "Brak danych";
+                TrendIcon = "➖";
+                TrendColorHex = "#6B7280";
+                return;
+            }
+
+            decimal first = values.First();
+            decimal last = values.Last();
+            decimal difference = last - first;
+
+            if (difference > 0.01m)
+            {
+                TrendText = "Trend rosnący";
+                TrendIcon = "📈";
+                TrendColorHex = "#10B981";
+            }
+            else if (difference < -0.01m)
+            {
+                TrendText = "Trend spadkowy";
+                TrendIcon = "📉";
+                TrendColorHex = "#EF4444";
+            }
+            else
+            {
+                TrendText = "Trend stabilny";
+                TrendIcon = "➖";
+                TrendColorHex = "#F59E0B";
+            }
+        }
+
+        [RelayCommand]
+        public async Task LoadStatisticsAsync()
+        {
+            if (SelectedCurrency == null)
+            {
+                ErrorMessage = "Najpierw wybierz walutę.";
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = string.Empty;
+
+                var endDate = DateTime.Today;
+                var startDate = endDate.AddDays(-14);
+
+                var historicalRates = await _currencyService.GetHistoricalRatesAsync(
+                    SelectedCurrency.Code,
+                    startDate,
+                    endDate);
+
+                var data = historicalRates
+                    .OrderBy(r => r.EffectiveDate)
+                    .ToList();
+
+                if (!data.Any())
+                {
+                    ErrorMessage = "Brak danych statystycznych.";
+                    return;
+                }
+
+                var values = data.Select(x => x.Mid).ToList();
+
+                CurrentRateText = data.Last().Mid.ToString("F4");
+                MinRateText = values.Min().ToString("F4");
+                MaxRateText = values.Max().ToString("F4");
+                AverageRateText = values.Average().ToString("F4");
+
+                CalculateTrend(values);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Błąd ładowania statystyk: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+        partial void OnSelectedCurrencyChanged(CurrencyRate? value)
+        {
+            if (value != null)
+            {
+                _ = LoadStatisticsAsync();
+            }
+            else
+            {
+                CurrentRateText = "-";
+                MinRateText = "-";
+                MaxRateText = "-";
+                AverageRateText = "-";
+                TrendText = "-";
+                TrendIcon = "➖";
+                TrendColorHex = "#6B7280";
+            }
         }
 
         [RelayCommand]
@@ -225,5 +347,6 @@ namespace CurrencyApp.ViewModels
                 ConversionHistory.Add(item);
             }
         }
+
     }
 }

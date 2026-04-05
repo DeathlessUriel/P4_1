@@ -122,7 +122,92 @@
 					</CollectionView>
 				</VerticalStackLayout>
 			</Frame>
+			<Frame
+    CornerRadius="18"
+    Padding="16"
+    BackgroundColor="White"
+    BorderColor="#E5E7EB"
+    HasShadow="True">
+<Label
+    Text="{Binding SelectedCurrency.Code, StringFormat='Wybrana waluta: {0}'}"
+    FontSize="16"
+    FontAttributes="Bold"
+    TextColor="#2563EB" />
+    <VerticalStackLayout Spacing="16">
+        <Label
+            Text="Statystyki wybranej waluty"
+            FontSize="22"
+            FontAttributes="Bold"
+            TextColor="#111827" />
 
+        <Button
+            Text="Odśwież statystyki"
+            Command="{Binding LoadStatisticsCommand}"
+            BackgroundColor="#7C3AED"
+            TextColor="White"
+            CornerRadius="12"
+            HeightRequest="48" />
+
+        <Frame
+            CornerRadius="14"
+            Padding="14"
+            BackgroundColor="#F9FAFB"
+            BorderColor="#E5E7EB">
+
+            <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                <Label
+                    Text="{Binding TrendIcon}"
+                    FontSize="26"
+                    VerticalOptions="Center" />
+
+                <VerticalStackLayout Spacing="2">
+                    <Label
+                        Text="Trend waluty"
+                        FontSize="13"
+                        TextColor="#6B7280" />
+
+                    <Label
+                        Text="{Binding TrendText}"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="{Binding TrendColorHex}" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+
+            <Frame Grid.Row="0" Grid.Column="0" CornerRadius="14" Padding="12" BackgroundColor="#F9FAFB" BorderColor="#E5E7EB">
+                <VerticalStackLayout>
+                    <Label Text="Aktualny kurs" FontSize="13" TextColor="#6B7280" />
+                    <Label Text="{Binding CurrentRateText}" FontSize="20" FontAttributes="Bold" TextColor="#2563EB" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Grid.Row="0" Grid.Column="1" CornerRadius="14" Padding="12" BackgroundColor="#F9FAFB" BorderColor="#E5E7EB">
+                <VerticalStackLayout>
+                    <Label Text="Minimum" FontSize="13" TextColor="#6B7280" />
+                    <Label Text="{Binding MinRateText}" FontSize="20" FontAttributes="Bold" TextColor="#10B981" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Grid.Row="1" Grid.Column="0" CornerRadius="14" Padding="12" BackgroundColor="#F9FAFB" BorderColor="#E5E7EB">
+                <VerticalStackLayout>
+                    <Label Text="Maximum" FontSize="13" TextColor="#6B7280" />
+                    <Label Text="{Binding MaxRateText}" FontSize="20" FontAttributes="Bold" TextColor="#EF4444" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Grid.Row="1" Grid.Column="1" CornerRadius="14" Padding="12" BackgroundColor="#F9FAFB" BorderColor="#E5E7EB">
+                <VerticalStackLayout>
+                    <Label Text="Średnia" FontSize="13" TextColor="#6B7280" />
+                    <Label Text="{Binding AverageRateText}" FontSize="20" FontAttributes="Bold" TextColor="#7C3AED" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </Grid>
+    </VerticalStackLayout>
+</Frame>
 			<Frame
                 CornerRadius="18"
                 Padding="16"
